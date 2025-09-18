@@ -1,0 +1,346 @@
+﻿<Window x:Class="ElasticSearchPostgreSQLMigrationTool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CSV to PostgreSQL Migration Tool" 
+        Height="800" 
+        Width="1300"
+        MinHeight="650"
+        MinWidth="950"
+        WindowStartupLocation="CenterScreen"
+        Icon="/Resources/icon.ico">
+
+    <Window.Resources>
+        <!-- Styles -->
+        <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#2C3E50"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+        </Style>
+
+        <Style x:Key="SubHeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#34495E"/>
+            <Setter Property="Margin" Value="0,5,0,3"/>
+        </Style>
+
+        <Style x:Key="InfoTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="#7F8C8D"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+        </Style>
+
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#3498DB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="5" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2980B9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#21618C"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#BDC3C7"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Background" Value="#95A5A6"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#7F8C8D"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#6C7B7D"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SuccessButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Background" Value="#27AE60"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#229954"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#1E8449"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Progress Bar Style -->
+        <Style x:Key="ModernProgressBarStyle" TargetType="ProgressBar">
+            <Setter Property="Height" Value="10"/>
+            <Setter Property="Background" Value="#ECF0F1"/>
+            <Setter Property="Foreground" Value="#3498DB"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="5">
+                            <Grid>
+                                <Border Name="PART_Track" 
+                                        Background="{TemplateBinding Background}" 
+                                        CornerRadius="5"/>
+                                <Border Name="PART_Indicator" 
+                                        Background="{TemplateBinding Foreground}" 
+                                        CornerRadius="5"
+                                        HorizontalAlignment="Left"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <!-- Ana Grid'e MaxWidth ekleyelim -->
+        <Grid Margin="20" MaxWidth="1240">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="190"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <!-- Header - Slightly Larger -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                <Image Source="/Resources/database.png" 
+                       Width="36" Height="36" Margin="0,0,12,0"/>
+                <StackPanel>
+                    <TextBlock Text="CSV to PostgreSQL Migration Tool" 
+                              Style="{StaticResource HeaderTextStyle}"/>
+                    <TextBlock Text="Import CSV data to PostgreSQL database" 
+                              Style="{StaticResource InfoTextStyle}"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- File Selection -->
+            <GroupBox Grid.Row="1" Header="📁 CSV File Selection" Margin="0,0,0,15" Padding="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="20"/>
+                        <!-- Sabit yükseklik -->
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox x:Name="FilePathTextBox" 
+                     Grid.Column="0"
+                     Text="{Binding SelectedFilePath, Mode=TwoWay}"
+                     Height="35"
+                     VerticalContentAlignment="Center"
+                     Padding="10,0"
+                     FontSize="12"
+                     IsReadOnly="True"
+                     Background="#F8F9FA"/>
+
+                        <Button x:Name="BrowseButton" 
+                    Grid.Column="1" 
+                    Content="Browse..." 
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Margin="10,0,0,0"
+                    Click="BrowseButton_Click"/>
+                    </Grid>
+
+                    <TextBlock x:Name="FileInfoText" 
+                   Grid.Row="1"
+                   Text="{Binding FileInfo}"
+                   Style="{StaticResource InfoTextStyle}"
+                   Visibility="{Binding FileInfoVisibility}"
+                   VerticalAlignment="Top"
+                   Margin="0,5,0,0"/>
+                </Grid>
+            </GroupBox>
+
+            <!-- Migration Settings -->
+            <GroupBox Grid.Row="2" Header="⚙️ Migration Settings" Margin="0,0,0,12" Padding="12" FontSize="13">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Batch Size" Style="{StaticResource SubHeaderTextStyle}"/>
+                        <TextBox x:Name="BatchSizeTextBox" 
+                                 Text="{Binding BatchSize, Mode=TwoWay}"
+                                 Height="32"
+                                 VerticalContentAlignment="Center"
+                                 Padding="8,0"
+                                 FontSize="13"/>
+
+                        <CheckBox x:Name="DryRunCheckBox" 
+                                  Content="Dry Run (Analysis Only)"
+                                  IsChecked="{Binding DryRun, Mode=TwoWay}"
+                                  Margin="0,10,0,0"
+                                  FontSize="13"/>
+
+                        <CheckBox x:Name="TruncateCheckBox" 
+                                  Content="Truncate Table Before Migration"
+                                  IsChecked="{Binding TruncateBeforeMigration, Mode=TwoWay}"
+                                  Margin="0,6,0,0"
+                                  FontSize="13"
+                                  Foreground="#E74C3C"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Database Connection" Style="{StaticResource SubHeaderTextStyle}"/>
+                        <TextBox x:Name="ConnectionStringTextBox" 
+                                 Text="{Binding ConnectionString, Mode=TwoWay}"
+                                 Height="32"
+                                 VerticalContentAlignment="Center"
+                                 Padding="8,0"
+                                 FontSize="13"/>
+
+                        <CheckBox x:Name="ParallelProcessingCheckBox" 
+                                  Content="Enable Parallel Processing"
+                                  IsChecked="{Binding EnableParallelProcessing, Mode=TwoWay}"
+                                  Margin="0,10,0,0"
+                                  FontSize="13"/>
+
+                        <CheckBox x:Name="IgnoreDuplicatesCheckBox" 
+                                  Content="Ignore Duplicates"
+                                  IsChecked="{Binding IgnoreDuplicates, Mode=TwoWay}"
+                                  Margin="0,6,0,0"
+                                  FontSize="13"/>
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+
+            <!-- Progress Section -->
+            <GroupBox Grid.Row="3" Header="📊 Migration Progress" Margin="0,0,0,12" Padding="12" FontSize="13">
+                <StackPanel>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock x:Name="ProgressText" 
+                                  Text="{Binding ProgressMessage}"
+                                  Grid.Column="0"
+                                  VerticalAlignment="Center"
+                                  FontWeight="SemiBold"
+                                  FontSize="13"/>
+
+                        <TextBlock x:Name="ProgressPercentage" 
+                                  Text="{Binding ProgressPercentageText}"
+                                  Grid.Column="1"
+                                  VerticalAlignment="Center"
+                                  FontWeight="Bold"
+                                  Foreground="#3498DB"
+                                  FontSize="13"/>
+                    </Grid>
+
+                    <ProgressBar x:Name="MigrationProgressBar" 
+                                Value="{Binding ProgressPercentage}"
+                                Style="{StaticResource ModernProgressBarStyle}"
+                                Margin="0,0,0,10"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" 
+                                  Text="{Binding ProcessedRecordsText}"
+                                  Style="{StaticResource InfoTextStyle}"/>
+
+                        <TextBlock Grid.Column="1" 
+                                  Text="{Binding SpeedText}"
+                                  Style="{StaticResource InfoTextStyle}"
+                                  HorizontalAlignment="Center"/>
+
+                        <TextBlock Grid.Column="2" 
+                                  Text="{Binding EtaText}"
+                                  Style="{StaticResource InfoTextStyle}"
+                                  HorizontalAlignment="Right"/>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Grid.Row="4" Header="📋 Log Output" Padding="12" FontSize="13">
+                <Border BorderThickness="1" BorderBrush="#E5E5E5" CornerRadius="3">
+                    <ScrollViewer x:Name="LogScrollViewer"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  Height="150"
+                                  CanContentScroll="False">
+                        <TextBox x:Name="LogTextBox"
+                                 Text="{Binding LogOutput}"
+                                 IsReadOnly="True"
+                                 Background="#F8F9FA"
+                                 FontFamily="Consolas"
+                                 FontSize="12"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 BorderThickness="0"
+                                 Padding="10"
+                                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+                    </ScrollViewer>
+                </Border>
+            </GroupBox>
+
+            <!-- Action Buttons -->
+            <StackPanel Grid.Row="5" 
+                       Orientation="Horizontal" 
+                       HorizontalAlignment="Right" 
+                       Margin="0,25,0,0">
+
+                <Button x:Name="ValidateButton" 
+                        Content="🔍 Validate CSV" 
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Margin="0,0,10,0"
+                        Click="ValidateButton_Click"
+                        IsEnabled="{Binding CanValidate}"/>
+
+                <Button x:Name="StartMigrationButton" 
+                        Content="🚀 Start Migration" 
+                        Style="{StaticResource SuccessButtonStyle}"
+                        Margin="0,0,10,0"
+                        Click="StartMigrationButton_Click"
+                        IsEnabled="{Binding CanStartMigration}"/>
+
+                <Button x:Name="CancelButton" 
+                        Content="❌ Cancel" 
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="CancelButton_Click"
+                        IsEnabled="{Binding CanCancel}"/>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Window>
