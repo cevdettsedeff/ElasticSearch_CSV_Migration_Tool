@@ -1,4 +1,4 @@
-﻿# CSV to PostgreSQL Migration Tool
+﻿# ElasticSearch and CSV to PostgreSQL Migration Tool
 
 A modern WPF application for migrating ElasticSearch or CSV data to PostgreSQL databases with ElasticSearch support and clean architecture design.
 
